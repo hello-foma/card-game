@@ -1,14 +1,15 @@
 import './index.css'
+import Scaffold from '../../shared/scaffold/scaffold';
 
 function Welcome() {
+  const footer = <footer>
+    <button>Create game</button>
+  </footer>;
+
   return (
-    <div className="scaffold">
-      <header><h1>Cheat card game</h1></header>
-      <main><p>Game's description</p></main>
-      <footer>
-        <button>Create game</button>
-      </footer>
-    </div>
+    <Scaffold footer={footer} title={'Cheat card game'}>
+      <p>Game's description</p>
+    </Scaffold>
   )
 }
 

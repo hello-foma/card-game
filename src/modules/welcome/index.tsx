@@ -1,3 +1,6 @@
+import { useNavigate } from 'react-router-dom';
+
+import Scaffold from '@shared/components/scaffold';
 import './index.css'
 import Scaffold from '../../shared/scaffold/scaffold';
 

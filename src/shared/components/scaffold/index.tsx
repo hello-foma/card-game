@@ -1,5 +1,5 @@
-import { ReactNodeProps } from '../types/react-elem.type';
 import React from 'react';
+import { ReactNodeProps } from '@shared/types/react-elem.type';
 
 type ScaffoldProps = ReactNodeProps<{
   title?: string,

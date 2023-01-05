@@ -1,7 +1,6 @@
-import './App.css'
+import './index.css'
 
-function App() {
-
+function Welcome() {
   return (
     <div className="scaffold">
       <header><h1>Cheat card game</h1></header>
@@ -13,4 +12,4 @@ function App() {
   )
 }
 
-export default App
+export default Welcome

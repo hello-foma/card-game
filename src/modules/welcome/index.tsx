@@ -1,12 +1,13 @@
-import { useNavigate } from 'react-router-dom';
-
 import Scaffold from '@shared/components/scaffold';
 import './index.css'
-import Scaffold from '../../shared/scaffold/scaffold';
+import { useDispatch } from 'react-redux';
+import { requestCreate as requestBoardCreate  } from '@modules/board/slice';
 
 function Welcome() {
+  const dispatch = useDispatch();
+
   const footer = <footer>
-    <button>Create game</button>
+    <button onClick={() => dispatch(requestBoardCreate)}>Create game</button>
   </footer>;
 
   return (

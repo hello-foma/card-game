@@ -1,12 +1,9 @@
-import { RouteObject } from 'react-router-dom';
+import { Route } from 'react-router-dom';
 
 import Lobby from './index';
 
-export const LobbyRouteName = 'board/:boardId/lobby';
+export const LobbyRouteName = (boardId = ':boardId') => `board/${boardId}/lobby`;
 
-export default [
-  {
-    path: LobbyRouteName,
-    element: <Lobby/>
-  },
-] as RouteObject[];
+export default () => <>
+  <Route path={LobbyRouteName()} element={<Lobby />}></Route>
+</>

@@ -1,14 +1,11 @@
-import { createBrowserRouter } from 'react-router-dom';
 import Welcome from '@modules//welcome';
-import lobbyRoutes from '@modules/lobby/routes';
+import LobbyRoutes from '@modules/lobby/routes';
+import { Route, Routes } from 'react-router-dom';
 
 export const rootRoutePath = '/';
 
-export default createBrowserRouter([
-  {
-    path: rootRoutePath,
-    element: <Welcome />
-  },
-  ...lobbyRoutes
-]);
+export default () => <Routes>
+  <Route element={<Welcome />} path={rootRoutePath}></Route>
+  {LobbyRoutes()}
+</Routes>
 

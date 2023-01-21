@@ -1,7 +1,8 @@
 import Scaffold from '@shared/components/scaffold';
-import './index.css'
 import { useDispatch } from 'react-redux';
-import { requestCreate as requestBoardCreate  } from '@modules/boards/slice';
+
+import './index.css'
+import { requestCreate as requestBoardCreate  } from './slice';
 
 function Welcome() {
   const dispatch = useDispatch();

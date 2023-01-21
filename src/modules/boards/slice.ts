@@ -10,23 +10,18 @@ const name = 'currentBoard';
 export type CurrentBoardState = {
   boards: Board[],
   activeBoard: string | null,
-  isLoading: boolean
 };
 const initialState: CurrentBoardState = {
   boards: [],
   activeBoard: null,
-  isLoading: false
 };
 
 const slice = createSlice({
   name,
   initialState: () => initialState,
   reducers: {
-    requestCreate: ( state) => {
-      state.isLoading = true
-    },
+    requestCreate: ( state) => state,
     created:( state, { payload }: PayloadAction<Board>) => {
-      state.isLoading = false;
       state.boards.push(payload);
       state.activeBoard = payload.id;
     },

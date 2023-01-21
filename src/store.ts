@@ -1,10 +1,7 @@
-import { configureStore } from '@reduxjs/toolkit'
+import { combineReducers } from '@reduxjs/toolkit';
 
-export const store = configureStore({
-  reducer: {},
-})
+import boardsReducer from '@modules/boards/slice';
 
-// Infer the `RootState` and `AppDispatch` types from the store itself
-export type RootState = ReturnType<typeof store.getState>
-// Inferred type: {posts: PostsState, comments: CommentsState, users: UsersState}
-export type AppDispatch = typeof store.dispatch
+export default combineReducers({
+  boardsState: boardsReducer
+});

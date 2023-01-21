@@ -1,13 +1,11 @@
 import { createBrowserRouter } from 'react-router-dom';
 import Welcome from './modules/welcome';
 
-export const enum RouteName {
-  root = '/',
-}
+export const rootRoutePath = '/';
 
 export default createBrowserRouter([
   {
-    path: RouteName.root,
+    path: rootRoutePath,
     element: <Welcome />
   },
 ]);

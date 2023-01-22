@@ -1,14 +1,17 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { put, takeLatest } from 'redux-saga/effects'
+import { put, takeLatest, select } from 'redux-saga/effects'
 import { DeckApi } from '@modules/deck-api/deck.api';
-import { Deck } from '@modules/deck-api/deck.model';
+import { DeckProps } from '@modules/deck-api/deck.model';
 
-import { Board } from './board.model';
+import { BoardProps } from './board.model';
+import { LocalStorageSync } from '@shared/services/local-storage-sync';
+import { RootState } from '@shared/types/root-state';
 
 const name = 'currentBoard';
+let slicePath: string; // init when connect reducer
 
 export type CurrentBoardState = {
-  boards: Board[],
+  boards: BoardProps[],
   activeBoard: string | null,
 };
 const initialState: CurrentBoardState = {
@@ -21,7 +24,7 @@ const slice = createSlice({
   initialState: () => initialState,
   reducers: {
     requestCreate: ( state) => state,
-    created:( state, { payload }: PayloadAction<Board>) => {
+    created:( state, { payload }: PayloadAction<BoardProps>) => {
       state.boards.push(payload);
       state.activeBoard = payload.id;
     },
@@ -30,14 +33,28 @@ const slice = createSlice({
 
 export const { requestCreate, created } = slice.actions;
 
+export const selectors = {
+  selectSlice: (rootState: RootState) => rootState[slicePath] as CurrentBoardState,
+  selectBoards: (rootState: RootState) => selectors.selectSlice(rootState).boards
+};
+
 export const saga = [
   takeLatest(requestCreate.type, function* () {
     // todo handle error
-    const deck: Deck = yield DeckApi.createDeck();
-    const board = new Board({id: deck.deck_id, deck});
+    const deck: DeckProps = yield DeckApi.createDeck();
+    const board: BoardProps = {id: deck.deck_id, deck};
 
     yield put(created(board));
+  }),
+  takeLatest(created.type, function* () {
+    const boards: BoardProps[]  = yield select(selectors.selectBoards);
+
+    yield LocalStorageSync.putState<CurrentBoardState>(slicePath, { boards })
   })
 ];
 
-export default slice.reducer;
+export default (path: string) => {
+  slicePath = path;
+
+  return slice.reducer;
+};

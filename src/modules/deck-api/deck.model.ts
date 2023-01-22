@@ -1,7 +1,15 @@
+import { PileProps } from './pile.model';
+
 export type DeckProps = {
   deck_id: string;
   remaining: number;
 }
+export type DeckPingProps = {
+  piles: {
+    [pileName: string]: PileProps,
+    ping: PileProps
+  }
+} & DeckProps;
 
 export class Deck {
   deck_id: string;

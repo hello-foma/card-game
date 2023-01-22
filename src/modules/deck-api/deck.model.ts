@@ -1,23 +1,14 @@
-import { PileProps } from './pile.model';
-
 export type DeckProps = {
-  deck_id: string;
-  remaining: number;
+  id: string;
+  hostId: string;
 }
-export type DeckPingProps = {
-  piles: {
-    [pileName: string]: PileProps,
-    ping: PileProps
-  }
-} & DeckProps;
 
 export class Deck {
-  deck_id: string;
-  remaining: number;
+  id: string;
 
   constructor(props: DeckProps) {
-    const { deck_id, remaining } = props;
-    this.deck_id = deck_id;
-    this.remaining = remaining;
+    const { id } = props;
+
+    this.id = id;
   }
 }

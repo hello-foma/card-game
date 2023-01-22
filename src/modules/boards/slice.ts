@@ -6,6 +6,7 @@ import { DeckApi } from '@modules/deck-api/deck.api';
 import { DeckProps } from '@modules/deck-api/deck.model';
 import { LocalStorageSync } from '@shared/services/local-storage-sync';
 import { rootRoutePath, RootState } from '@shared/types/root-state';
+import { requestId, selectors as userSelectors } from '@modules/user/slice';
 
 import { BoardProps } from './board.model';
 
@@ -51,8 +52,13 @@ export const selectors = {
 export const saga = [
   takeLatest(requestCreate.type, function* () {
     // todo handle error
-    const deck: DeckProps = yield DeckApi.createDeck();
-    const board: BoardProps = {id: deck.deck_id, deck};
+    let userId: string = yield select(userSelectors.selectId);
+    if (userId === null) {
+      yield put(requestId());
+      userId = yield select(userSelectors.selectId);
+    }
+    const deck: DeckProps = yield DeckApi.createDeck(userId);
+    const board: BoardProps = {id: deck.id, deck};
 
     yield put(created(board));
   }),

@@ -8,6 +8,7 @@ import { LocalStorageSync } from '@shared/services/local-storage-sync';
 import { RootState } from '@shared/types/root-state';
 
 const name = 'currentBoard';
+// todo: reduce slicePath and make an order with exports. (Separate exports to diff files?)
 let slicePath: string; // init when connect reducer
 
 export type CurrentBoardState = {

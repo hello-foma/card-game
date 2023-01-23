@@ -3,7 +3,11 @@ import { useDispatch, useSelector } from 'react-redux';
 import Scaffold from '@shared/components/scaffold';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { tryToSetActive, tryAssignCurrentUser, selectors as boardSelectors } from '@modules/board/slice';
+import {
+  tryAssignCurrentUser,
+  selectors as boardSelectors,
+  requestSyncPolling, tryToSetActive, cancelSyncPolling
+} from '@modules/board/slice';
 import { push } from 'redux-first-history';
 import { rootRoutePath } from '@shared/types/root-state';
 import { requestNewUser, selectors as userSelectors, updateName } from '@modules/user/slice';
@@ -11,10 +15,12 @@ import { boardIdParamName } from '@modules/lobby/routes';
 
 function Lobby() {
   const dispatch = useDispatch();
+
   const { [boardIdParamName]: boardId } = useParams();
   const user = useSelector(userSelectors.selectSlice);
   const isHost = useSelector(boardSelectors.isHost(user.uuid));
   const users = useSelector(boardSelectors.selectUsers);
+  const selectedBoard = useSelector(boardSelectors.selectBoardId);
 
   if (user.uuid === null) {
     dispatch(requestNewUser());
@@ -24,13 +30,24 @@ function Lobby() {
   useEffect(() => {
     if (typeof boardId !== 'string') {
       dispatch(push(rootRoutePath));
-    } else {
+      return;
+    }
+
+    if (selectedBoard !== boardId) {
       dispatch(tryToSetActive(boardId));
+    } else {
       if (user.uuid !== null) {
         dispatch(tryAssignCurrentUser());
+        dispatch(requestSyncPolling());
       }
     }
-  }, [boardId, user]);
+  }, [boardId, user, selectedBoard]);
+
+  useEffect(() => {
+    return () => {
+      dispatch(cancelSyncPolling())
+    };
+  }, []);
 
   const [nameChanged, changeName] = useState('');
 

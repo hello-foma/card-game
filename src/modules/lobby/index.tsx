@@ -14,6 +14,7 @@ function Lobby() {
   const { [boardIdParamName]: boardId } = useParams();
   const userId = useSelector(userSelectors.selectId);
   const isHost = useSelector(boardSelectors.isHost(userId));
+  const users = useSelector(boardSelectors.selectUsers);
 
   if (userId === null) {
     dispatch(requestId());
@@ -35,6 +36,14 @@ function Lobby() {
       <div>
         Lobby content {userId} at {boardId} and you are { isHost ? '' : 'not '} a host
       </div>
+      {users !== null &&
+        <>
+        <div>Users list</div>
+          <ul>
+            {users.map(user => <li key={user}>{user}</li>)}
+          </ul>
+        </>
+      }
     </div>
   </Scaffold>;
 }

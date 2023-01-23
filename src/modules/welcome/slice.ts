@@ -1,9 +1,8 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { put, takeLatest } from 'redux-saga/effects';
+import { createSlice } from '@reduxjs/toolkit';
+import { put, take, takeLatest } from 'redux-saga/effects';
 import { push } from 'redux-first-history';
 
-import { created as boardCreated, requestCreate as requestBoardCreate } from '@modules/boards/slice';
-import { Board } from '@modules/boards/board.model';
+import { set as boardCreated, requestCreate as requestBoardCreate, CurrentBoardState } from '@modules/boards/slice';
 import { LobbyRouteName } from 'modules/lobby/routes';
 
 export type WelcomePageState = {
@@ -31,15 +30,10 @@ const slice = createSlice({
 export const { requestCreate, created } = slice.actions;
 
 export const saga = [
-    takeLatest(requestCreate().type, function* () {
+  takeLatest(requestCreate().type, function* () {
       yield put(requestBoardCreate());
-    }),
-    takeLatest(boardCreated.type, function* (action: PayloadAction<Board>) {
-      yield put(created());
-      const { payload } = action;
-      const { id } = payload;
-
-      yield put(push(LobbyRouteName(id)));
+      const { payload } = yield take(boardCreated.type);
+      yield put(push(LobbyRouteName(payload.deckId as string)));
     }),
   ];
 

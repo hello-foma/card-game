@@ -3,15 +3,17 @@ import { useDispatch, useSelector } from 'react-redux';
 import Scaffold from '@shared/components/scaffold';
 import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { tryToSetActive } from '@modules/boards/slice';
+import { tryToSetActive, selectors as boardSelectors } from '@modules/boards/slice';
 import { push } from 'redux-first-history';
 import { rootRoutePath } from '@shared/types/root-state';
-import { requestId, selectors } from '@modules/user/slice';
+import { requestId, selectors as userSelectors } from '@modules/user/slice';
+import { boardIdParamName } from '@modules/lobby/routes';
 
 function Lobby() {
   const dispatch = useDispatch();
-  const { boardId } = useParams();
-  const userId = useSelector(selectors.selectId);
+  const { [boardIdParamName]: boardId } = useParams();
+  const userId = useSelector(userSelectors.selectId);
+  const isHost = useSelector(boardSelectors.isHost(userId));
 
   if (userId === null) {
     dispatch(requestId());
@@ -26,7 +28,14 @@ function Lobby() {
     }
   }, [boardId])
 
-  return <Scaffold>Lobby content {userId} at {boardId}</Scaffold>;
+  return <Scaffold>
+    <div>
+      <input readOnly={true} value={location.href} style={{width: 500}}/>
+      <div>
+        Lobby content {userId} at {boardId} and you are { isHost ? '' : 'not '} a host
+      </div>
+    </div>
+  </Scaffold>;
 }
 
 export default Lobby

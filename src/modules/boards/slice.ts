@@ -3,24 +3,26 @@ import { put, takeLatest, select } from 'redux-saga/effects';
 import { push } from 'redux-first-history';
 
 import { DeckApi } from '@modules/deck-api/deck.api';
-import { DeckProps } from '@modules/deck-api/deck.model';
-import { LocalStorageSync } from '@shared/services/local-storage-sync';
 import { rootRoutePath, RootState } from '@shared/types/root-state';
 import { requestId, selectors as userSelectors } from '@modules/user/slice';
-
-import { BoardProps } from './board.model';
 
 const name = 'currentBoard';
 // todo: reduce slicePath and make an order with exports. (Separate exports to diff files?)
 let slicePath: string; // init when connect reducer
+type BoardStatus = any;
+type Player = any;
 
 export type CurrentBoardState = {
-  boards: BoardProps[],
-  activeBoard: string | null,
+  hostId: string | null,
+  deckId: string | null,
+  status: BoardStatus | null,
+  players: Player[] | null,
 };
 const initialState: CurrentBoardState = {
-  boards: [],
-  activeBoard: null,
+  hostId: null,
+  deckId: null,
+  status: null,
+  players: null,
 };
 
 const slice = createSlice({
@@ -28,25 +30,20 @@ const slice = createSlice({
   initialState: () => initialState,
   reducers: {
     requestCreate: ( state) => state,
-    created:( state, { payload }: PayloadAction<BoardProps>) => {
-      state.boards.push(payload);
-      state.activeBoard = payload.id;
+    set:( state, { payload }: PayloadAction<CurrentBoardState>) => {
+      state = {...state, ...payload};
+
+      return state;
     },
     tryToSetActive: (state, {payload}: PayloadAction<string>) => state,
-    setActive: (state, {payload}: PayloadAction<string | null>) => {
-      state.activeBoard = payload;
-    }
   }
 });
 
-export const { requestCreate, created, tryToSetActive } = slice.actions;
+export const { requestCreate, set, tryToSetActive } = slice.actions;
 
 export const selectors = {
   selectSlice: (rootState: RootState) => rootState[slicePath] as CurrentBoardState,
-  selectBoards: (rootState: RootState) => selectors.selectSlice(rootState).boards,
-  selectBoard: (boardId: string) =>
-    (rootState: RootState) =>
-      selectors.selectBoards(rootState).some((board) => board.id === boardId),
+  isHost: (hostId: string | null) => (rootState: RootState) => hostId !== null && selectors.selectSlice(rootState).hostId === hostId
 };
 
 export const saga = [
@@ -57,30 +54,23 @@ export const saga = [
       yield put(requestId());
       userId = yield select(userSelectors.selectId);
     }
-    const deck: DeckProps = yield DeckApi.createDeck(userId);
-    const board: BoardProps = {id: deck.id, deck};
+    const deck: CurrentBoardState = yield DeckApi.createDeck(userId);
 
-    yield put(created(board));
-  }),
-  takeLatest(created.type, function* () {
-    const boards: BoardProps[]  = yield select(selectors.selectBoards);
-
-    yield LocalStorageSync.putState<CurrentBoardState>(slicePath, { boards })
+    yield put(set(deck));
   }),
   takeLatest(tryToSetActive.type, function* ({payload}: PayloadAction<string>) {
-    const id = payload;
-    const isBoardCached = yield select(selectors.selectBoard(id));
-    if (isBoardCached) {
-      yield put(slice.actions.setActive(id));
-    } else {
-      try {
-        yield DeckApi.pingDeck(id);
-        yield put(slice.actions.setActive(id));
-      } catch (e) {
-        yield put(slice.actions.setActive(null));
-        // todo add notification channel
-        yield put(push(rootRoutePath));
+    try {
+      const currentState: CurrentBoardState = yield select(selectors.selectSlice);
+      if (currentState.deckId === payload) {
+        return;
       }
+
+      const state: CurrentBoardState = yield DeckApi.pingDeck(payload);
+      yield put(slice.actions.set(state));
+    } catch (e) {
+      yield put(slice.actions.set(initialState));
+      // todo add notification channel
+      yield put(push(rootRoutePath));
     }
   })
 ];

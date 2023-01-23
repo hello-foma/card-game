@@ -26,9 +26,11 @@ function Lobby() {
       dispatch(push(rootRoutePath));
     } else {
       dispatch(tryToSetActive(boardId));
-      dispatch(tryAssignCurrentUser());
+      if (user.uuid !== null) {
+        dispatch(tryAssignCurrentUser());
+      }
     }
-  }, [boardId]);
+  }, [boardId, user]);
 
   const [nameChanged, changeName] = useState('');
 

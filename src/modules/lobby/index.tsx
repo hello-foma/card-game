@@ -1,22 +1,22 @@
 import { useDispatch, useSelector } from 'react-redux';
 
 import Scaffold from '@shared/components/scaffold';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { tryToSetActive, tryAssignCurrentUser, selectors as boardSelectors } from '@modules/board/slice';
 import { push } from 'redux-first-history';
 import { rootRoutePath } from '@shared/types/root-state';
-import { requestNewUser, selectors as userSelectors } from '@modules/user/slice';
+import { requestNewUser, selectors as userSelectors, updateName } from '@modules/user/slice';
 import { boardIdParamName } from '@modules/lobby/routes';
 
 function Lobby() {
   const dispatch = useDispatch();
   const { [boardIdParamName]: boardId } = useParams();
-  const userId = useSelector(userSelectors.selectId);
-  const isHost = useSelector(boardSelectors.isHost(userId));
+  const user = useSelector(userSelectors.selectSlice);
+  const isHost = useSelector(boardSelectors.isHost(user.uuid));
   const users = useSelector(boardSelectors.selectUsers);
 
-  if (userId === null) {
+  if (user.uuid === null) {
     dispatch(requestNewUser());
   }
 
@@ -28,19 +28,36 @@ function Lobby() {
       dispatch(tryToSetActive(boardId));
       dispatch(tryAssignCurrentUser());
     }
-  }, [boardId])
+  }, [boardId]);
+
+  const [nameChanged, changeName] = useState('');
+
+  useEffect(() => {
+    if (user.name !== null) {
+      changeName(user.name);
+    }
+  }, [user])
+
+
+
+  const nameInput = <div>
+    <input value={nameChanged} onChange={(event) => changeName(event.target.value)}/>
+    <button onClick={() => dispatch(updateName(nameChanged))}>change</button>
+  </div>
 
   return <Scaffold>
     <div>
       <input readOnly={true} value={location.href} style={{width: 500}}/>
       <div>
-        Lobby content {userId} at {boardId} and you are { isHost ? '' : 'not '} a host
+        Lobby content {user.uuid} at {boardId} and you are { isHost ? '' : 'not '} a host
       </div>
       {users !== null &&
         <>
         <div>Users list</div>
           <ul>
-            {users.map(user => <li key={user.id}>{user.name}</li>)}
+            {users.map(gameUser =>
+              <li key={gameUser.id}>{ gameUser.id === user.uuid ? nameInput : gameUser.name}</li>
+            )}
           </ul>
         </>
       }

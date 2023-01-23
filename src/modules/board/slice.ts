@@ -4,7 +4,7 @@ import { push } from 'redux-first-history';
 
 import { DeckApi } from '@modules/deck-api/deck.api';
 import { rootRoutePath, RootState } from '@shared/types/root-state';
-import { requestNewUser, selectors as userSelectors, UserState } from '@modules/user/slice';
+import { requestNewUser, selectors as userSelectors, updateName, UserState } from '@modules/user/slice';
 import { DeckApiResponseFull } from '@modules/deck-api/response.type';
 
 const name = 'currentBoard';
@@ -123,6 +123,18 @@ export const saga = [
     const res: DeckApiResponseFull = yield DeckApi.assignUser(deckId, user.uuid, user.name);
     yield put(slice.actions.set(DeckApi.parseBoardState(res)))
   }),
+  takeLatest(updateName, function* ({payload}) {
+    const user: UserState = yield select(userSelectors.selectSlice);
+    const boardId: string= yield select(selectors.selectBoardId);
+
+    if (user.uuid === null) {
+      throw new Error('Empty user');
+    }
+
+    const deckUpdate: DeckApiResponseFull = yield DeckApi.changeName(boardId, user.uuid, payload);
+
+    yield put(slice.actions.set(DeckApi.parseBoardState(deckUpdate)));
+  })
 ];
 
 export default (path: string) => {

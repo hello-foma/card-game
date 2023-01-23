@@ -6,7 +6,7 @@ import { useParams } from 'react-router-dom';
 import { tryToSetActive, tryAssignCurrentUser, selectors as boardSelectors } from '@modules/board/slice';
 import { push } from 'redux-first-history';
 import { rootRoutePath } from '@shared/types/root-state';
-import { requestId, selectors as userSelectors } from '@modules/user/slice';
+import { requestNewUser, selectors as userSelectors } from '@modules/user/slice';
 import { boardIdParamName } from '@modules/lobby/routes';
 
 function Lobby() {
@@ -17,7 +17,7 @@ function Lobby() {
   const users = useSelector(boardSelectors.selectUsers);
 
   if (userId === null) {
-    dispatch(requestId());
+    dispatch(requestNewUser());
   }
 
   // todo why effect fire twice?
@@ -40,7 +40,7 @@ function Lobby() {
         <>
         <div>Users list</div>
           <ul>
-            {users.map(user => <li key={user}>{user}</li>)}
+            {users.map(user => <li key={user.id}>{user.name}</li>)}
           </ul>
         </>
       }

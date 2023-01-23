@@ -3,28 +3,31 @@ import { put, takeLatest } from 'redux-saga/effects';
 import { generateUUID } from '@shared/services/uuid';
 import { LocalStorageSync } from '@shared/services/local-storage-sync';
 import { RootState } from '@shared/types/root-state';
+import { NamesApi } from '@modules/names-api/names-api';
 
 const sliceName = 'user';
 let slicePath: string;
 
-type UserState = {
-  uuid: string | null
+export type UserState = {
+  uuid: string | null,
+  name: string | null
 }
 
 const initialState: UserState = {
-  uuid: null
+  uuid: null,
+  name: null
 };
 
 const slice = createSlice({
   name: sliceName,
   initialState,
   reducers: {
-    requestId: (state) => state,
-    setId: (state, {payload}: PayloadAction<string> ) => {state.uuid = payload}
+    requestNewUser: (state) => state,
+    setUser: (state, {payload}: PayloadAction<UserState>) => payload,
   }
 });
 
-export const { requestId } = slice.actions;
+export const { requestNewUser } = slice.actions;
 
 export const selectors = {
   selectSlice: (state: RootState) => state[slicePath] as UserState,
@@ -32,11 +35,13 @@ export const selectors = {
 };
 
 export const saga = [
-  takeLatest(slice.actions.requestId, function* () {
+  takeLatest(slice.actions.requestNewUser, function* () {
     const uuid = generateUUID();
+    const name: string = yield NamesApi.getName();
+    const user: UserState = { uuid, name };
 
-    yield LocalStorageSync.putState<UserState>(slicePath, { uuid });
-    yield put(slice.actions.setId(uuid));
+    yield LocalStorageSync.putState<UserState>(slicePath, user);
+    yield put(slice.actions.setUser(user));
   }),
 ];
 

@@ -4,7 +4,7 @@ import { push } from 'redux-first-history';
 
 import { DeckApi } from '@modules/deck-api/deck.api';
 import { rootRoutePath, RootState } from '@shared/types/root-state';
-import { requestId, selectors as userSelectors } from '@modules/user/slice';
+import { requestNewUser, selectors as userSelectors, UserState } from '@modules/user/slice';
 import { DeckApiResponseFull } from '@modules/deck-api/response.type';
 
 const name = 'currentBoard';
@@ -12,7 +12,10 @@ const name = 'currentBoard';
 let slicePath: string; // init when connect reducer
 type BoardStatus = any;
 type Player = any;
-type User = string;
+export type User = {
+  id: string,
+  name: string
+};
 
 export type CurrentBoardState = {
   hostId: string | null,
@@ -61,19 +64,25 @@ export const selectors = {
       return false;
     }
 
-    return users.includes(userId);
+    return users.some(user => user.id === userId);
   }
 };
 
 export const saga = [
   takeLatest(requestCreate.type, function* () {
     // todo handle error
-    let userId: string = yield select(userSelectors.selectId);
-    if (userId === null) {
-      yield put(requestId());
-      userId = yield select(userSelectors.selectId);
+    let user: UserState = yield select(userSelectors.selectSlice);
+
+    if (user.uuid === null) {
+      yield put(requestNewUser());
+      user = yield select(userSelectors.selectSlice);
     }
-    const deck: DeckApiResponseFull = yield DeckApi.createDeck(userId);
+
+    if (user.uuid === null || user.name === null) {
+      throw new Error('Empty user');
+    }
+
+    const deck: DeckApiResponseFull = yield DeckApi.createDeck(user.uuid, user.name);
 
     yield put(set(DeckApi.parseBoardState(deck)));
   }),
@@ -100,14 +109,18 @@ export const saga = [
       deckId = state.deckId
     }
 
-    const userId: string = yield select(userSelectors.selectId);
-    const isAlreadyAssigned: boolean = yield select(selectors.isUser(userId));
+    const user: UserState = yield select(userSelectors.selectSlice);
+    const isAlreadyAssigned: boolean = yield select(selectors.isUser(user.uuid));
 
     if (isAlreadyAssigned) {
       return;
     }
 
-    const res: DeckApiResponseFull = yield DeckApi.assignUser(deckId, userId);
+    if (user.uuid === null || user.name === null) {
+      throw Error('Empty user');
+    }
+
+    const res: DeckApiResponseFull = yield DeckApi.assignUser(deckId, user.uuid, user.name);
     yield put(slice.actions.set(DeckApi.parseBoardState(res)))
   }),
 ];

@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import Scaffold from '@shared/components/scaffold';
 import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { tryToSetActive, selectors as boardSelectors } from '@modules/boards/slice';
+import { tryToSetActive, tryAssignCurrentUser, selectors as boardSelectors } from '@modules/board/slice';
 import { push } from 'redux-first-history';
 import { rootRoutePath } from '@shared/types/root-state';
 import { requestId, selectors as userSelectors } from '@modules/user/slice';
@@ -25,6 +25,7 @@ function Lobby() {
       dispatch(push(rootRoutePath));
     } else {
       dispatch(tryToSetActive(boardId));
+      dispatch(tryAssignCurrentUser());
     }
   }, [boardId])
 

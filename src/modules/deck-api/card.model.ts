@@ -1,8 +1,9 @@
 import { CardValue } from './card-value.enum';
 import { CardSuit } from './card-suit.enum';
+import { CardToken } from './card-tokens';
 
 export type CardProps = {
-  code: string;
+  code: CardToken;
   image: string;
   images: {
     svg: string,
@@ -13,7 +14,7 @@ export type CardProps = {
 }
 
 export class Card implements CardProps {
-  code: string;
+  code: CardToken;
   image: string;
   images: {
     svg: string,

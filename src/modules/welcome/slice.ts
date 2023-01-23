@@ -2,7 +2,7 @@ import { createSlice } from '@reduxjs/toolkit';
 import { put, take, takeLatest } from 'redux-saga/effects';
 import { push } from 'redux-first-history';
 
-import { set as boardCreated, requestCreate as requestBoardCreate, CurrentBoardState } from '@modules/boards/slice';
+import { set as boardCreated, requestCreate as requestBoardCreate } from '@modules/board/slice';
 import { LobbyRouteName } from 'modules/lobby/routes';
 
 export type WelcomePageState = {

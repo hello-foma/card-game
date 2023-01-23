@@ -2,7 +2,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { put, select, takeLatest } from 'redux-saga/effects';
 import { RootState } from '@shared/types/root-state';
 import { LocalStorageSync } from '@shared/services/local-storage-sync';
-import { set } from '@modules/boards/slice';
+import { set } from '@modules/board/slice';
 
 const sliceName = 'history';
 let slicePath: string;

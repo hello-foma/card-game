@@ -1,4 +1,4 @@
-import boardsReducer from '@modules/boards/slice';
+import boardsReducer from '@modules/board/slice';
 import userReducer from '@modules/user/slice';
 import historyReducer from '@modules/history/slice';
 

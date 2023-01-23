@@ -1,3 +1,6 @@
+import { Card } from '@modules/deck-api/card.model';
+
 export type PileProps = {
-  remaining: number
+  remaining: number,
+  cards: Card[]
 }
